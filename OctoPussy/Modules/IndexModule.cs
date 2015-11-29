@@ -15,6 +15,8 @@ namespace OctoPussy.Modules
         public IndexModule(SlackService slack, GitHubStatusAPIService gitservice)
         {
             var channel = ConfigurationManager.AppSettings["test:channel"];
+            var url = ConfigurationManager.AppSettings["octopussy:url"];
+
             Get["/"] = parameters =>
             {
                 return View["index"];
@@ -37,7 +39,7 @@ namespace OctoPussy.Modules
                 return await slack.Send(payload, channel);
             };
 
-            Get["/test/github/status/{owner}/{repo}/{reference}/{status?pending}/{context?all}", true] = async (x, ct) =>
+            Get["/github/status/{owner}/{repo}/{reference}/{status?pending}/{context?all}", true] = async (x, ct) =>
             {
                 bool all = x.context == "all";
 
@@ -58,12 +60,12 @@ namespace OctoPussy.Modules
 
                     foreach (var check in statusChecks)
                     {
-                        await gitservice.SetStatus(owner, repo, reference, check.Item1, status, check.Item2, GeneratePullRequestSuccessURL(owner, repo, reference, check.Item1, CommitState.Success));
+                        await gitservice.SetStatus(owner, repo, reference, check.Item1, status, check.Item2, GeneratePullRequestSuccessURL(url, owner, repo, reference, check.Item1, CommitState.Success));
                     }
                 }
                 else
                 {
-                    await gitservice.SetStatus(owner, repo, reference, x.context, status, "", GeneratePullRequestSuccessURL(owner, repo, reference, x.context, Octokit.CommitState.Success));
+                    await gitservice.SetStatus(owner, repo, reference, x.context, status, "", GeneratePullRequestSuccessURL(url, owner, repo, reference, x.context, Octokit.CommitState.Success));
                 }
 
                 return View["index"];
@@ -138,10 +140,9 @@ namespace OctoPussy.Modules
             return payload;
         }
 
-        private string GeneratePullRequestSuccessURL(string owner, string repo, string reference, dynamic context, CommitState status)
+        private string GeneratePullRequestSuccessURL(string nancyUrl, string owner, string repo, string reference, dynamic context, CommitState status)
         {
-            string myURL = "http://localhost:1329";
-            return String.Format("{0}/test/github/status/{1}/{2}/{3}/{4}/{5}", myURL, owner, repo, reference, status, context);
+            return String.Format("{0}/github/status/{1}/{2}/{3}/{4}/{5}", nancyUrl, owner, repo, reference, status, context);
         }
     }
 }
