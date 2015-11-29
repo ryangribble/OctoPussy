@@ -140,9 +140,9 @@ namespace OctoPussy.Modules
             return payload;
         }
 
-        private string GeneratePullRequestSuccessURL(string nancyUrl, string owner, string repo, string reference, dynamic context, CommitState status)
+        private string GeneratePullRequestSuccessURL(string selfUrl, string owner, string repo, string reference, dynamic context, CommitState status)
         {
-            return String.Format("{0}/github/status/{1}/{2}/{3}/{4}/{5}", nancyUrl, owner, repo, reference, status, context);
+            return String.Format("{0}/github/status/{1}/{2}/{3}/{4}/{5}", selfUrl, owner, repo, reference, status, context);
         }
     }
 }
